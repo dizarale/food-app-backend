@@ -1,0 +1,12 @@
+{
+  "name": "UM-StartUp",
+  "version": "1.0.0",
+  "description": "My first project",
+  "dependencies": {
+  	"express": "*",
+    "mongodb": "*",
+    "body-parser" : "*",
+    "connect" : "*"
+  },
+  "license": "Apache 2.0"
+}
