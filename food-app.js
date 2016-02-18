@@ -4,7 +4,7 @@ var app = express();
 var bodyParser    = require('body-parser');
 var cookie  = require('cookie-parser');
 var mongo   = require('mongodb').MongoClient;
-var storage = 'mongodb://localhost:27017/food-app';
+var storage = 'mongodb://128.199.125.64:27017/food-app';
 
 var page = ['index','user','resturant','menu'];
 
