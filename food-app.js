@@ -4,7 +4,7 @@ var app = express();
 var bodyParser    = require('body-parser');
 var cookie  = require('cookie-parser');
 var mongo   = require('mongodb').MongoClient;
-var storage = 'mongodb://http://54.200.145.4:27017/food-app';
+var storage = 'mongodb://localhost:27017/food-app';
 
 var page = ['index','user','resturant','menu'];
 
@@ -247,7 +247,7 @@ app.put('/menu/:res_id', (req, res) => {
 	});
 });
 app.use(ErrorHandler);
-app.listen(1200);
+app.listen(80);
 
 function ErrorHandler( req, res) {
 	var check =0;
