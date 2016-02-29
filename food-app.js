@@ -247,7 +247,7 @@ app.put('/menu/:res_id', (req, res) => {
 	});
 });
 app.use(ErrorHandler);
-app.listen(1200);
+app.listen(80);
 
 function ErrorHandler( req, res) {
 	var check =0;
