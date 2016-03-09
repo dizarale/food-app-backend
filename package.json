@@ -1,12 +1,17 @@
 {
-  "name": "UM-StartUp",
+  "name": "food-app-backend",
   "version": "1.0.0",
-  "description": "My first project",
-  "dependencies": {
-  	"express": "*",
-    "mongodb": "*",
-    "body-parser" : "*",
-    "connect" : "*"
+  "description" : "food-app-backend",
+  "dependencies":{
+  		"express": "*",
+  		"body-parser": "*",
+  		"cookie-parser": "*",
+  		"mongodb": "*"
+  	},
+  "main": "food-app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "license": "Apache 2.0"
+  "author": "",
+  "license": "ISC"
 }
