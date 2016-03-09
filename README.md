@@ -9,7 +9,7 @@
 <br>resturant [put] : update resturant -> key :{name,lat,lng}
 <br>resturant/rout [get][ทดสอบ] :  rout resturant 
 <br>menu/res_id [get] : get All menu of res_id
-<br>menu/res_id [post] : insert menu from res_id -> key: {name,price,pic}
-<br>menu/res_id [put] : update menu from res_id -> key: {name,price,pic}
+<br>menu/res_id [post] : insert menu from res_id -> key: {name,price,pic,type}
+<br>menu/res_id [put] : update menu from res_id -> key: {name,price,pic,type}
 <br>order/preorder [get] : get All preorder 
 <br>order/preorder/menu [post] : add menu to preorder -> key: {email,res_id,menu_id,menu_num,menu_des,order_lat,order_lng,order_detail}
