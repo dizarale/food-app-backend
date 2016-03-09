@@ -390,7 +390,7 @@ app.post('/order/preorder/menu', (req, res) => {
 	let order_lat = req.body.order_lat;
 	let order_lng = req.body.order_lng;
 	let order_detail = req.body.order_detail;
-
+	var data;
 	if(Menu_num>0 && Menu_num<100){
 		mongo.connect(storage, (error, database) => {
 			database
@@ -414,6 +414,7 @@ app.post('/order/preorder/menu', (req, res) => {
 							var order_menu = { row:1 , menu : order};
 							database.collection('orders').insert({
 								email:    user,
+								restaurant: res_id,
 								order_status : 0,
 								order_location : { order_lat : order_lat , order_lng : order_lng },
 								order_detail : order_detail,
@@ -422,33 +423,36 @@ app.post('/order/preorder/menu', (req, res) => {
 							let result = { "status" : 0 , "detail" : "Insert Pre-Order" };
 							res.json(result);
 						}else if(result.length == 1){
-							var order = [];
-							let num = result[0]['order_menu']['row'];
-							var check = false;
-							for (var i = 0; i < num; i++) {
-								if(Menu_id == result[0]['order_menu']['menu'][i]['menu_id'] && Menu_des == result[0]['order_menu']['menu'][i]['menu_des']){
-									console.log("have");
-									result[0]['order_menu']['menu'][i]['menu_num'] = parseInt(result[0]['order_menu']['menu'][i]['menu_num']) +  parseInt(Menu_num);
-									order.push(result[0]['order_menu']['menu'][i]);
-									check = true;
+							if(res_id == result[0]['res_id']){
+								var order = [];
+								let num = result[0]['order_menu']['row'];
+								var check = false;
+								for (var i = 0; i < num; i++) {
+									if(Menu_id == result[0]['order_menu']['menu'][i]['menu_id'] && Menu_des == result[0]['order_menu']['menu'][i]['menu_des']){
+										console.log("have");
+										result[0]['order_menu']['menu'][i]['menu_num'] = parseInt(result[0]['order_menu']['menu'][i]['menu_num']) +  parseInt(Menu_num);
+										order.push(result[0]['order_menu']['menu'][i]);
+										check = true;
+									}else{
+										order.push(result[0]['order_menu']['menu'][i]);
+									}
+								};
+								if(check){
+									var order_menu = { row:num , menu : order};
+									data = { "status" : 1 , "detail" : "Update Menu in Pre-Order" };
 								}else{
-									order.push(result[0]['order_menu']['menu'][i]);
+									num++;
+									var order_menu = { row:num , menu : order};
+									order.push(menu);
+									data = { "status" : 1 , "detail" : "Update Insert Menu in Pre-Order" };
 								}
-							};
-							var data;
-							if(check){
-								var order_menu = { row:num , menu : order};
-								data = { "status" : 1 , "detail" : "Update Menu in Pre-Order" };
+								database.collection('orders').update({ email:user },{ $set:{
+									order_menu : order_menu
+								}});
+								
 							}else{
-								num++;
-								var order_menu = { row:num , menu : order};
-								order.push(menu);
-								data = { "status" : 1 , "detail" : "Update Insert Menu in Pre-Order" };
+								data = { "status" : -1 , "detail" : "Have Menu in other restaurant" };
 							}
-							database.collection('orders').update({ email:user },{ $set:{
-								order_menu : order_menu
-							}});
-							
 							res.json(data);
 						}
 					});
