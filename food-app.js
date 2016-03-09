@@ -95,7 +95,7 @@ app.get ('/resturant/rout',  (req, res) => {
 	mongo.connect(storage, (error, database) => {
 		database
 		.collection('resturant')
-		.find().
+		.find({ "_id" : res_id }).
 		toArray((error, result) => {
 			if (result.length == 0) {
 				let result = { "status" : -1, "detail" : "Not Found Resturant"};
