@@ -383,7 +383,9 @@ app.get ('/order/preorder/',  (req, res) => {
 app.post('/order/preorder/menu', (req, res) => {
 	var user = req.body.email;
 	let res_id =  req.body.res_id;
+	let RES_id = require('mongodb').ObjectID(res_id);
 	let Menu_id = req.body.menu_id;
+	let MENU_id = require('mongodb').ObjectID(Menu_id);
 	let Menu_num = req.body.menu_num;
 	let Menu_des = req.body.menu_des;
 	let menu = {menu_id : Menu_id , menu_num:Menu_num , menu_des : Menu_des};
@@ -391,6 +393,7 @@ app.post('/order/preorder/menu', (req, res) => {
 	let order_lng = req.body.order_lng;
 	let order_detail = req.body.order_detail;
 	var data;
+	console.log(MENU_id);
 	if(Menu_num>0 && Menu_num<100){
 		mongo.connect(storage, (error, database) => {
 			database
@@ -404,64 +407,75 @@ app.post('/order/preorder/menu', (req, res) => {
 					let result = { "status" :  -1 , "detail" : "Not Have User" };
 					res.json(result);
 				}else if(result.length == 1){
-					database.collection('orders').find({email:user,order_status:0}).toArray((error,result) =>{
+					database.collection('menu').find({"res_id" : RES_id , "_id" : MENU_id }).toArray((error,result) => {
 						if(error){
 							let result = { "status" : 0 , "detail" : "Database Error" };
 							res.json(result);
-						}else if(result.length == 0){
-							var order = [];
-							order.push(menu);
-							var order_menu = { row:1 , menu : order};
-							database.collection('orders').insert({
-								email:    user,
-								restaurant: res_id,
-								order_status : 0,
-								order_location : { order_lat : order_lat , order_lng : order_lng },
-								order_detail : order_detail,
-								order_menu : order_menu
-							});
-							let result = { "status" : 0 , "detail" : "Insert Pre-Order" };
+						}else if (result.length == 0){
+							let result = { "status" : -1 , "detail" : "id not match" };
 							res.json(result);
-						}else if(result.length == 1){
-							if(res_id == result[0]['res_id']){
+						}else if(result.length == 1 ){
+							database.collection('orders').find({email:user,order_status:0}).toArray((error,result) =>{
+							if(error){
+								let result = { "status" : 0 , "detail" : "Database Error" };
+								res.json(result);
+							}else if(result.length == 0){
 								var order = [];
-								let num = result[0]['order_menu']['row'];
-								var check = false;
-								for (var i = 0; i < num; i++) {
-									if(Menu_id == result[0]['order_menu']['menu'][i]['menu_id'] && Menu_des == result[0]['order_menu']['menu'][i]['menu_des']){
-										console.log("have");
-										result[0]['order_menu']['menu'][i]['menu_num'] = parseInt(result[0]['order_menu']['menu'][i]['menu_num']) +  parseInt(Menu_num);
-										order.push(result[0]['order_menu']['menu'][i]);
-										check = true;
-									}else{
-										order.push(result[0]['order_menu']['menu'][i]);
-									}
-								};
-								if(check){
-									var order_menu = { row:num , menu : order};
-									data = { "status" : 1 , "detail" : "Update Menu in Pre-Order" };
-								}else{
-									num++;
-									var order_menu = { row:num , menu : order};
-									order.push(menu);
-									data = { "status" : 1 , "detail" : "Update Insert Menu in Pre-Order" };
-								}
-								database.collection('orders').update({ email:user },{ $set:{
+								order.push(menu);
+								var order_menu = { row:1 , menu : order};
+								database.collection('orders').insert({
+									email:    user,
+									restaurant: res_id,
+									order_status : 0,
+									order_location : { order_lat : order_lat , order_lng : order_lng },
+									order_detail : order_detail,
 									order_menu : order_menu
-								}});
-								
-							}else{
-								data = { "status" : -1 , "detail" : "Have Menu in other restaurant" };
+								});
+								let result = { "status" : 0 , "detail" : "Insert Pre-Order" };
+								res.json(result);
+							}else if(result.length == 1){
+								console.log(result[0]['res_id']);
+								if(res_id == result[0]['restaurant']){
+									var order = [];
+									let num = result[0]['order_menu']['row'];
+									var check = false;
+									for (var i = 0; i < num; i++) {
+										if(Menu_id == result[0]['order_menu']['menu'][i]['menu_id'] && Menu_des == result[0]['order_menu']['menu'][i]['menu_des']){
+											console.log("have");
+											result[0]['order_menu']['menu'][i]['menu_num'] = parseInt(result[0]['order_menu']['menu'][i]['menu_num']) +  parseInt(Menu_num);
+											order.push(result[0]['order_menu']['menu'][i]);
+											check = true;
+										}else{
+											order.push(result[0]['order_menu']['menu'][i]);
+										}
+									};
+									if(check){
+										var order_menu = { row:num , menu : order};
+										data = { "status" : 1 , "detail" : "Update Menu in Pre-Order" };
+									}else{
+										num++;
+										var order_menu = { row:num , menu : order};
+										order.push(menu);
+										data = { "status" : 1 , "detail" : "Update Insert Menu in Pre-Order" };
+									}
+									database.collection('orders').update({ email:user },{ $set:{
+										order_menu : order_menu
+									}});
+									
+								}else{
+									data = { "status" : -1 , "detail" : "Have Menu in other restaurant" };
+								}
+								res.json(data);
 							}
-							res.json(data);
+							});
 						}
-					});
+					});		
 				}
 			});
 		});
 	}else{
-		var data;
-		data = { "status" : -1 , "detail" : "menu is 0 or Over [Who are You]" };
+		data = { "status" : -1 , "detail" : "Something wrong" };
+		res.json(data);
 	}
 });
 app.use(ErrorHandler);
